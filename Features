@@ -1,0 +1,9 @@
+6. Features Extras
+
+feat: adiciona data/hora automática no histórico  
+- Usa `time.h` para registrar data da partida  
+- Formato: dd/mm/aaaa hh:mm  
+
+feat: valida número de discos (3 a 8)  
+- Impede entrada inválida no menu  
+- Mensagem de erro explicativa  
