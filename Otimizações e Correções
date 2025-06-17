@@ -1,0 +1,11 @@
+5. Otimizações e Correções
+
+fix: resolve vazamento de memória ao reiniciar jogo  
+- Libera discos alocados com `free()`  
+
+perf: otimiza inicialização do jogo  
+- Pré-aloca memória para discos em loop único  
+
+style: padroniza comentários e nomes de variáveis  
+- Documenta funções principais  
+- Renomeia `topo` para `topo_disco` (mais descritivo)  
