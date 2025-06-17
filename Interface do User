@@ -1,0 +1,9 @@
+4. Interface do Usuário
+
+feat: adiciona menu interativo  
+- Opções: Novo Jogo, Histórico, Sair  
+- Valida entrada do usuário com `limparBuffer()`  
+
+feat: exibe histórico formatado no terminal  
+- Ordena por data (mais recente primeiro)  
+- Mostra nome, discos, movimentos e data  
