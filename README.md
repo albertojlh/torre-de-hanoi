@@ -1,308 +1,35 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <stdbool.h>
+# Torre de Hanoi em C
 
-typedef struct Disco {
-    int tamanho;
-    struct Disco *prox;
-} Disco;
+Trabalho individual da disciplina de Estrutura de Dados.
 
-typedef struct Torre {
-    Disco *topo;
-    int quantidade;
-} Torre;
+## Sobre o jogo
 
-typedef struct Partida {
-    char nome[50];
-    int discos;
-    int movimentos;
-    char data[20];
-    struct Partida *prox;
-} Partida;
+Este projeto implementa o clássico jogo **Torre de Hanoi**, em linguagem C, com:
 
-Torre torres[3];
-Partida *historico = NULL;
-int movimentos = 0;
+- Interface no terminal
+- Histórico de partidas salvas em arquivo `.txt`
+- Validação de jogadas
+- Registro com nome do jogador e data
 
-void inicializarJogo(int num_discos);
-void exibirTorres();
-int moverDisco(int origem, int destino);
-bool verificarVitoria(int num_discos);
-void jogar(int num_discos);
-void adicionarAoHistorico(char *nome, int discos, int movimentos);
-void salvarHistorico();
-void carregarHistorico();
-void exibirHistorico();
-void menuPrincipal();
-void limparBuffer();
+## Autor
 
-int main() {
-    menuPrincipal();
-    return 0;
-}
+**Alberto Joaquim Lopes de Holanda**
 
-void inicializarJogo(int num_discos) {
-    for (int i = 0; i < 3; i++) {
-        torres[i].topo = NULL;
-        torres[i].quantidade = 0;
-    }
+## Como executar
 
-    for (int i = num_discos; i >= 1; i--) {
-        Disco *novoDisco = (Disco*)malloc(sizeof(Disco));
-        novoDisco->tamanho = i;
-        novoDisco->prox = torres[0].topo;
-        torres[0].topo = novoDisco;
-        torres[0].quantidade++;
-    }
-    movimentos = 0;
-}
+1. Compile com:
 
-void exibirTorres() {
-    printf("\n");
-    int max_discos = 0;
+```bash
+gcc main.c -o hanoi
+```
 
-    for (int i = 0; i < 3; i++) {
-        if (torres[i].quantidade > max_discos) {
-            max_discos = torres[i].quantidade;
-        }
-    }
+2. Execute com:
 
-    for (int i = 0; i < 3; i++) {
-        printf("Torre %d:\n", i+1);
+```bash
+./hanoi
+```
 
-        if (torres[i].quantidade == 0) {
-            printf("(vazia)\n\n");
-            continue;
-        }
+## Histórico salvo em `historico.txt`
 
-        Disco *atual = torres[i].topo;
-        int discos[10];
-        int count = 0;
-
-        while (atual != NULL) {
-            discos[count++] = atual->tamanho;
-            atual = atual->prox;
-        }
-
-        for (int j = count-1; j >= 0; j--) {
-            for (int k = 0; k < (max_discos - discos[j]); k++) {
-                printf(" ");
-            }
-            for (int k = 0; k < discos[j]; k++) {
-                printf("#");
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
-}
-
-int moverDisco(int origem, int destino) {
-    origem--; destino--;
-
-    if (origem < 0 || origem > 2 || destino < 0 || destino > 2) {
-        printf("Torre inválida!\n");
-        return 0;
-    }
-
-    if (torres[origem].topo == NULL) {
-        printf("Não há discos na torre de origem!\n");
-        return 0;
-    }
-
-    if (torres[destino].topo != NULL && 
-        torres[origem].topo->tamanho > torres[destino].topo->tamanho) {
-        printf("Movimento inválido! Disco maior não pode ficar sobre disco menor.\n");
-        return 0;
-    }
-
-    Disco *discoMovido = torres[origem].topo;
-    torres[origem].topo = discoMovido->prox;
-    torres[origem].quantidade--;
-
-    discoMovido->prox = torres[destino].topo;
-    torres[destino].topo = discoMovido;
-    torres[destino].quantidade++;
-
-    movimentos++;
-    return 1;
-}
-
-bool verificarVitoria(int num_discos) {
-    return torres[2].quantidade == num_discos;
-}
-
-void jogar(int num_discos) {
-    inicializarJogo(num_discos);
-    int origem, destino;
-    char nome[50];
-
-    while (1) {
-        system("clear || cls");
-        printf("=== TORRE DE HANOI ===\n");
-        printf("Movimentos: %d\n", movimentos);
-        exibirTorres();
-
-        if (verificarVitoria(num_discos)) {
-            printf("Parabéns! Você resolveu a Torre de Hanoi em %d movimentos!\n", movimentos);
-            printf("Digite seu nome: ");
-            fgets(nome, 50, stdin);
-            nome[strcspn(nome, "\n")] = '\0';
-
-            adicionarAoHistorico(nome, num_discos, movimentos);
-            salvarHistorico();
-            break;
-        }
-
-        printf("Mover disco (origem destino): ");
-        if (scanf("%d %d", &origem, &destino) != 2) {
-            printf("Entrada inválida!\n");
-            limparBuffer();
-            continue;
-        }
-        limparBuffer();
-
-        if (origem == 0 || destino == 0) {
-            printf("Jogo cancelado.\n");
-            break;
-        }
-
-        moverDisco(origem, destino);
-    }
-}
-
-void adicionarAoHistorico(char *nome, int discos, int movimentos) {
-    Partida *novaPartida = (Partida*)malloc(sizeof(Partida));
-    strcpy(novaPartida->nome, nome);
-    novaPartida->discos = discos;
-    novaPartida->movimentos = movimentos;
-
-    time_t t = time(NULL);
-    struct tm tm = *localtime(&t);
-    sprintf(novaPartida->data, "%02d/%02d/%04d %02d:%02d", 
-            tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, 
-            tm.tm_hour, tm.tm_min);
-
-    novaPartida->prox = historico;
-    historico = novaPartida;
-}
-
-void salvarHistorico() {
-    FILE *arquivo = fopen("historico.txt", "w");
-    if (arquivo == NULL) {
-        printf("Erro ao salvar histórico!\n");
-        return;
-    }
-
-    Partida *atual = historico;
-    while (atual != NULL) {
-        fprintf(arquivo, "%s|%d|%d|%s\n", 
-                atual->nome, atual->discos, atual->movimentos, atual->data);
-        atual = atual->prox;
-    }
-
-    fclose(arquivo);
-}
-
-void carregarHistorico() {
-    FILE *arquivo = fopen("historico.txt", "r");
-    if (arquivo == NULL) return;
-
-    char linha[100];
-    while (fgets(linha, sizeof(linha), arquivo)) {
-        linha[strcspn(linha, "\n")] = '\0';
-
-        Partida *novaPartida = (Partida*)malloc(sizeof(Partida));
-        char *token = strtok(linha, "|");
-        if (token) strcpy(novaPartida->nome, token);
-
-        token = strtok(NULL, "|");
-        if (token) novaPartida->discos = atoi(token);
-
-        token = strtok(NULL, "|");
-        if (token) novaPartida->movimentos = atoi(token);
-
-        token = strtok(NULL, "|");
-        if (token) strcpy(novaPartida->data, token);
-
-        novaPartida->prox = historico;
-        historico = novaPartida;
-    }
-    fclose(arquivo);
-}
-
-void exibirHistorico() {
-    system("clear || cls");
-    printf("=== HISTÓRICO DE PARTIDAS ===\n\n");
-
-    Partida *atual = historico;
-    while (atual != NULL) {
-        printf("Jogador: %s\n", atual->nome);
-        printf("Discos: %d\n", atual->discos);
-        printf("Movimentos: %d\n", atual->movimentos);
-        printf("Data: %s\n", atual->data);
-        printf("----------------------------\n");
-        atual = atual->prox;
-    }
-
-    printf("\nPressione Enter para continuar...");
-    limparBuffer();
-    getchar();
-}
-
-void menuPrincipal() {
-    int opcao;
-    int num_discos;
-
-    carregarHistorico();
-
-    do {
-        system("clear || cls");
-        printf("=== TORRE DE HANOI ===\n");
-        printf("1. Novo jogo\n");
-        printf("2. Ver histórico\n");
-        printf("0. Sair\n");
-        printf("Escolha uma opção: ");
-
-        if (scanf("%d", &opcao) != 1) {
-            printf("Opção inválida!\n");
-            limparBuffer();
-            continue;
-        }
-        limparBuffer();
-
-        switch (opcao) {
-            case 1:
-                printf("Quantidade de discos (3-8): ");
-                if (scanf("%d", &num_discos) != 1) {
-                    printf("Quantidade inválida! Usando 3 discos.\n");
-                    num_discos = 3;
-                }
-                limparBuffer();
-
-                if (num_discos < 3 || num_discos > 8) {
-                    printf("Quantidade inválida! Usando 3 discos.\n");
-                    num_discos = 3;
-                }
-
-                jogar(num_discos);
-                break;
-            case 2:
-                exibirHistorico();
-                break;
-            case 0:
-                printf("Saindo...\n");
-                break;
-            default:
-                printf("Opção inválida!\n");
-        }
-    } while (opcao != 0);
-}
-
-void limparBuffer() {
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
-}
+Após finalizar uma partida, os dados serão salvos automaticamente.
 
