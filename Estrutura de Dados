@@ -1,0 +1,9 @@
+2. Estruturas de Dados
+
+feat: cria struct Disco e Torre  
+- Lista encadeada para discos em cada torre  
+- Tamanho do disco armazenado em `struct Disco`  
+
+feat: implementa histórico com struct Partida  
+- Armazena nome do jogador, data, discos e movimentos  
+- Lista encadeada para múltiplas partidas  
