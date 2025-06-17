@@ -1,0 +1,9 @@
+3. Persistência de Dados
+
+feat: salva histórico em arquivo texto  
+- Formato: nome|discos|movimentos|data  
+- Funções `salvarHistorico()` e `carregarHistorico()`  
+
+fix: corrige leitura de arquivo de histórico  
+- Problema: quebra de linha mal formatada  
+- Solução: uso de `strcspn()` para remover '\n' 
